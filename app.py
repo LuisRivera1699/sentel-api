@@ -105,4 +105,4 @@ def get_phone_rank(phone_number):
     return str(count)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='127.0.0.1')
