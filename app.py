@@ -3,6 +3,9 @@ from pymongo import MongoClient
 import pymongo
 import json
 from bson import json_util
+import sys
+
+print(sys.version)
 
 app = Flask(__name__)
 client = MongoClient("mongodb+srv://lrivera1699:Xxzzzxx123_1@cluster0.3xqiq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
