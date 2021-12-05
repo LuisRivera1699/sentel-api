@@ -18,6 +18,10 @@ score_collection = db.phoneScores
 def parse_json(data):
     return json.loads(json_util.dumps(data))
 
+@app.route('/')
+def index():
+    return 'Working'
+
 @app.route('/phones/<phone_number>/entel', methods=['GET'])
 def check_if_phone_is_entel(phone_number):
     result = phone_collection.find_one({'number': str(phone_number)})
@@ -105,4 +109,4 @@ def get_phone_rank(phone_number):
     return str(count)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1')
+    app.run(debug=True)
