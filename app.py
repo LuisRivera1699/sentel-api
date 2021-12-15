@@ -3,25 +3,38 @@ from pymongo import MongoClient
 import pymongo
 import json
 from bson import json_util
-import sys
 
-print(sys.version)
-
+# Se instancia el servidor Flask en app
+# Se instancia el cliente de Mongo
 app = Flask(__name__)
 client = MongoClient("mongodb+srv://lrivera1699:Xxzzzxx123_1@cluster0.3xqiq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 
+# db: base de datos sentel del cliente de Mongo
+# phone_collection: colección phones de la base de datos
+# score_collection: colección phoneScores de la base de datos
 db = client.sentel
-
 phone_collection = db.phones
 score_collection = db.phoneScores
 
+# Lógica para aceptar CORS request para compatibilidad con WebGL.
+# Se deberia cambiar el * de la linea 23 por la ip publica del servidor de EntelWebing
+@app.after_request
+def after_request(response):
+    response.headers["Access-Control-Allow-Origin"] = "*" # <- You can change "*" for a domain for example "http://localhost"
+    return response
+
+# Método para pasear un diccionario en un json
 def parse_json(data):
     return json.loads(json_util.dumps(data))
 
+# Ruta / para verificar que el servidor esté activo
 @app.route('/')
 def index():
     return 'Working'
 
+# Servicio GET que recibe un número telefónico y valida en 
+# la colección phone_collection si es un número entel o no.
+# retorna, en formato json, True si encuentra el número y False si no.
 @app.route('/phones/<phone_number>/entel', methods=['GET'])
 def check_if_phone_is_entel(phone_number):
     result = phone_collection.find_one({'number': str(phone_number)})
@@ -30,6 +43,10 @@ def check_if_phone_is_entel(phone_number):
     else:
         return jsonify({'isEntel': False})
 
+# Servicio GET que recibe un número telefónico y valida en
+# la colección score_collection si existe registro del número recibido
+# Si existe retorna los datos en formato json y si no, retorna False
+# en formato json
 @app.route('/scores/<phone_number>', methods=['GET'])
 def get_phone_score(phone_number):
     result = score_collection.find_one({'phoneNumber': str(phone_number)})
@@ -39,23 +56,9 @@ def get_phone_score(phone_number):
     else:
         return jsonify({'found': False, 'phoneNumber': str(phone_number)})
 
-@app.route('/scores/create', methods=['POST'])
-def create_phone_score():
-    validate = score_collection.find_one({'phoneNumber': request.form['phoneNumber']})
-    if validate == None:
-        try:
-            result = score_collection.insert_one({
-                'phoneNumber': request.form['phoneNumber'],
-                'lastScore': int(request.form['score']),
-                'bestScore': int(request.form['score'])
-            })
-            rdict = {'id': result.inserted_id, 'success': True}
-            return jsonify(parse_json(rdict))
-        except:
-            return jsonify({'success': False, 'error': 'An error has ocurred.'})
-    else:
-        return jsonify({'success': False, 'error': 'This phone has already a score register.'})
-
+# Servicio POST que recibe 3 parámetros: phoneNumber, lastScore y bestScore
+# Si el phoneNumber ya tiene un registro en la colección score_collection, se actualizan los datos de lastScore y bestScore
+# si no, se crea un nuevo registro con el phoneNumber, lastScore y bestScore
 @app.route('/scores', methods=['POST'])
 def update_phone_score():
     try:
@@ -86,6 +89,8 @@ def update_phone_score():
             print('a')
             return jsonify({'success': False, 'error': 'An error has ocurred.'})
 
+# Servicio GET que retorna una lista con los 5 mejores puntajes de los registros
+# de la colección score_collection en orden descendente con respecto al campo bestScore
 @app.route('/scores', methods=['GET'])
 def get_scores():
     result = score_collection.find().sort('bestScore', pymongo.DESCENDING)
@@ -97,6 +102,9 @@ def get_scores():
             pass               
     return str(l)
 
+# Servicio GET que retorna la posición del número telefónico en el ranking
+# de puntajes de la colección score_collection en orden descendente de acuerdo al campo
+# bestScore
 @app.route('/scores/<phone_number>/rank', methods=['GET'])
 def get_phone_rank(phone_number):
     result = score_collection.find().sort('bestScore', pymongo.DESCENDING)
@@ -108,5 +116,6 @@ def get_phone_rank(phone_number):
             count += 1
     return str(count)
 
+# Inicia el servidor Flask
 if __name__ == '__main__':
     app.run(debug=True)
