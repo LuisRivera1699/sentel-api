@@ -14,6 +14,7 @@ El código está completamente comentado. ```app.py``` en la raíz del proyecto 
 ### Instalación de Dependencias
 
 - Abrir una ventana de comandos, ir a la raiz del proyecto y ejecutar ```pip install -r requirements.txt```
+- En caso luego de ejecutar el proyecto aparezca un error, ejecutar el siguiente comando ```pip install pymongo[srv]``` o ```pip install 'pymongo[srv]'```
 
 ### Ejecución
 
