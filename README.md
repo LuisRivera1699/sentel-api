@@ -23,12 +23,12 @@ El código está completamente comentado. ```app.py``` en la raíz del proyecto 
  
 ## Equipo
 
-### Nombre
+### Nombre del equipo
 
 Chis Gaming
 
 ### Integrante
 
-Luis Rivera Díaz
-+51 932 104 502
-luisriveradiaz1699@gmail.com
+- Luis Rivera Díaz
+- +51 932 104 502
+- luisriveradiaz1699@gmail.com
